@@ -1,0 +1,248 @@
+@use './themes' as themes;
+@use './mixin' as mixins;
+* {
+  box-sizing: border-box;
+    padding: 0;
+      margin: 0;
+  /* 减小滚动条宽度 */
+    ::-webkit-scrollbar {
+      width: 5px;
+      /* 调整滚动条宽度 */
+      height: 5px;
+      /* 水平滚动条高度（如有需要） */
+    }
+  
+    /* 滚动条轨道 */
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+  
+    /* 滚动条滑块 */
+    ::-webkit-scrollbar-thumb {
+      background: #bfbfbf;
+      border-radius: 4px;
+    }
+  
+    /* 鼠标悬停时滑块颜色 */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+         &::selection {
+           background: transparent;
+         }
+    
+         &:focus {
+           outline: none;
+         }
+}
+#pageEditor{
+  height: 100vh;
+  box-sizing: border-box;
+  .outer-content {
+    height: 100%;
+    // 左侧边栏 -- 拖拽组件
+    &__component-aside {
+      @include mixins.get-bg-color('aside-color');
+      .el-tabs__item {
+        font-size: 16px;
+        padding: 10px;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column;
+        .label {
+          writing-mode: vertical-rl;
+          transform: rotate(360deg);
+        }
+      }
+      &__components-area{
+        transition: all 0.3s ease;
+        &__item {
+          @include mixins.get-bg-color('block-color');
+          &__label {
+            @include mixins.get-bg-color('btn-color');
+            @include mixins.get-font-color('font-color');
+            .checkbox {
+              .el-checkbox {
+                height: 20px;
+                .el-checkbox__inner {
+                  width: 18px;
+                  height: 18px;
+                  border-radius: 100px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    // 主体区域
+    .inner-content {
+      @include mixins.get-bg-color('main-color');
+      &__header {
+        @include mixins.get-bg-color('head-color');
+        height: auto !important; // 覆盖Element Plus默认高度
+        min-height: auto !important; // 移除最小高度限制
+        padding: 8px 0; // 保持上下内边距
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        
+        // 确保子元素能够正常布局
+        .el-row {
+          flex: 1;
+          margin: 0;
+        }
+      }
+      &__main {
+        position: relative;
+        margin: 0 auto;
+        overflow: hidden;
+      
+        &__item {
+          height: 40px;
+          position: absolute;
+        }
+      
+        &__item--focus {
+          @include mixins.get-border(1px, dashed, "head-color");
+          position: absolute;
+        }
+      
+        &__line-X {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          @include mixins.get-border(1px, dashed, "line-color", "left");
+          
+        }
+      
+        &__line-Y {
+          position: absolute;
+          left: 0;
+          right: 0;
+          @include mixins.get-border(1px, dashed, "line-color", "top");
+        }
+        // 组件样式
+        &__block{
+          
+          .block-resize {
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          @include mixins.get-bg-color('line-color');
+          z-index: 1000;
+      
+          &-left {
+            top: calc(50% - 4px);
+            left: -4px;
+          }
+      
+          &-right {
+            top: calc(50% - 4px);
+            right: -4px;
+          }
+      
+          &-top {
+            top: -4px;
+            left: calc(50% - 4px);
+      
+            &-right {
+              top: -4px;
+              right: -4px;
+      
+            }
+      
+            &-left {
+              top: -4px;
+              left: -4px;
+            }
+          }
+      
+          &-bottom {
+            bottom: -4px;
+            left: calc(50% - 4px);
+      
+            &-right {
+              bottom: -4px;
+              right: -4px
+            }
+      
+            &-left {
+              bottom: -4px;
+              left: -4px;
+            }
+          }
+           }
+        }
+      }
+      
+    }
+    // 右侧边栏 -- 操作组件
+    &__operator-aside{
+      @include mixins.get-bg-color('aside-color');
+      padding: 50px 20px;
+    }
+  }
+}
+// 取消默认动画
+.el-button,
+.el-input {
+  transition: none;
+}
+// dropdown样式
+.dropdown {
+  display: none;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  height: 130px;
+  width: 150px;
+  padding: 5px;
+  position: absolute;
+  &-item{
+    color: #2b2b2b;
+    border-bottom: 1px solid #ccc;
+    padding: 0 0 3px 5px;
+    &:last-child{
+      border: none;
+    }
+  }
+}
+.isShow-dropdown {
+  display: block;
+}
+/* 过渡动画样式 */
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter,
+.slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.theme-select-dropdown {
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// 响应式设计
+@media (max-width: 1520px) {
+  #pageEditor {
+    .outer-content {
+      height: calc(100vh - 20vh);
+    }
+    .outer-content__component-aside {
+      height: calc(100vh - 20vh);
+    }
+    .mobile-action-aside {
+      width: 100%;
+      height: 20vh;
+      padding:10px 50px;
+    }
+  }
+}
