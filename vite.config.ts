@@ -6,6 +6,7 @@ import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/LudLowCode/',
   plugins: [vue(), vueJsx(), UnoCSS()],
   resolve: {
     alias: {
