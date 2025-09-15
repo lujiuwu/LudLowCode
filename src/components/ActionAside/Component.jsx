@@ -7,6 +7,7 @@ export default defineComponent({
     data: { type: Object },
     updateContainer: { type: Function },
     updateBlock: { type: Function },
+    reset: { type: Function },
     LastSelectedBlock: { type: Object }
   },
   setup (props, { attrs }) {
@@ -18,6 +19,7 @@ export default defineComponent({
           v-model:data={props.data}
           updateContainer={props.updateContainer}
           updateBlock={props.updateBlock}
+          reset={props.reset}
         ></ActionForm>
       </ElAside>
     )

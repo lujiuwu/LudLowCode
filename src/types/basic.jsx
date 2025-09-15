@@ -14,24 +14,21 @@ export const basicComponents = [
         const text = renderProps.props.text || '默认文本'
         const style = {}
         if (renderProps.props.color) style.color = renderProps.props.color
-        if (renderProps.props.size) style.fontSize = renderProps.props.size
+        if (renderProps.props.size) style.fontSize = renderProps.props.size + 'px'
         return <span style={style}>{text}</span>
       }
       else return <span>默认文本</span>
     },
     props: {
-      text: createInput('文本内容'),
-      color: createColor('文本颜色'),
-      size: [
-        createSelector('字体大小', [
-          { label: '14px', value: '14px' },
-          { label: '16px', value: '16px' },
-          { label: '18px', value: '18px' },
-          { label: '20px', value: '20px' },
-          { label: '22px', value: '22px' },
-        ]),
-        createSlider('字体大小', 14, 22, 2)
-      ],
+      text: createInput('文本内容', '默认文本'),
+      color: createColor('文本颜色', '#000000'),
+      size: createSlider('字体大小', 14, 22, 2, {
+        14: '14px',
+        16: '16px',
+        18: '18px',
+        20: '20px',
+        22: '22px',
+      }, 14),
     }
   },
   // 按钮组件
@@ -42,7 +39,11 @@ export const basicComponents = [
     preview: () => <ElButton class='preview'>默认文本</ElButton>,
     render: (renderProps) => {
       if (renderProps && Object.keys(renderProps.props).length !== 0) {
-        return <ElButton style={Object.keys(renderProps.size).length !== 0 ? { height: renderProps.size.height + 'px', width: renderProps.size.width + 'px' } : {}} type={renderProps.props.type} size={renderProps.props.size}>{renderProps.props.text}</ElButton>
+        const buttonType = renderProps.props.buttonType || 'default'
+        const buttonSize = renderProps.props.buttonSize || 'default'
+        const buttonText = renderProps.props.text || '默认文本'
+        const buttonResize  = Object.keys(renderProps.size).length !== 0 ? { height: renderProps.size.height + 'px', width: renderProps.size.width + 'px' } : {}
+        return <ElButton style={buttonResize} type={buttonType} size={buttonSize}>{buttonText}</ElButton>
       } else return (<ElButton style={Object.keys(renderProps.size).length !== 0 ? { height: renderProps.size.height + 'px', width: renderProps.size.width + 'px' } : {}}>默认文本</ElButton>)
     },
     key: 'button',
@@ -55,12 +56,12 @@ export const basicComponents = [
         { label: '信息', value: 'info' },
         { label: '警告', value: 'warning' },
         { label: '危险', value: 'danger' }
-      ]),
+      ], 'default'),
       buttonSize: createSelector('按钮大小', [
         { label: '默认', value: 'default' },
         { label: '大', value: 'large' },
         { label: '小', value: 'small' }
-      ])
+      ], 'default')
     },
     // 伸缩选项
     resize: {
@@ -97,7 +98,7 @@ export const basicComponents = [
         { label: '默认', value: 'default' },
         { label: '大', value: 'large' },
         { label: '小', value: 'small' }
-      ])
+      ], 'default')
     },
     // 伸缩选项
     resize: {
@@ -111,12 +112,15 @@ export const basicComponents = [
     type: 'basic',
     preview: () => <ElSelect class='preview' placeholder="默认文本" style="width: 100%"></ElSelect>,
     render: (renderProps) => {
-      if (renderProps && Object.keys(renderProps.props).length !== 0 && Object.keys(renderProps.model).length !== 0) {
+      if (renderProps && renderProps.props) {
+        const selectSize = renderProps.props.size || 'default'
+        const modelProps = renderProps.model && renderProps.model.default ? renderProps.model.default : {}
         return (
           <ElSelect
-            {...renderProps.model.default}
+            {...modelProps}
             style="width: 172px"
             placeholder='默认文本'
+            size={selectSize}
           >
             {(renderProps.props.options || []).map((option, index) => {
               const optionValue = String(option.value)
@@ -149,7 +153,7 @@ export const basicComponents = [
         { label: '默认', value: 'default' },
         { label: '大', value: 'large' },
         { label: '小', value: 'small' }
-      ])
+      ], 'default')
     },
     model: {
       default: '绑定数据' // 默认值设为空字符串
@@ -161,10 +165,26 @@ export const basicComponents = [
     key: 'switch',
     type: 'basic',
     preview: () => <ElSwitch class='preview' />,
-    render: () => {
-      return <ElSwitch />
+    render: (renderProps) => {
+      const switchSize = renderProps?.props?.size || 'default'
+      const isActive = renderProps?.props?.active || false
+      return <ElSwitch 
+        size={switchSize} 
+        modelValue={isActive}
+        onUpdate:modelValue={(value) => {
+          if (renderProps?.props) {
+            renderProps.props.active = value
+          }
+        }}
+      />
     },
     props: {
+      size: createSelector('开关尺寸', [
+        { label: '默认', value: 'default' },
+        { label: '大', value: 'large' },
+        { label: '小', value: 'small' }
+      ], 'default'),
+      active: createInput('开关状态', false)
     }
   }
 ]

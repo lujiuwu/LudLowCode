@@ -200,6 +200,25 @@ export function useCommand (data) {
       }
     }
   })
+  // 重置
+  register({
+    name: 'reset',
+    isPushQueue: true,
+    execute () {
+      const defaultData = {
+        container: { width: 900, height: 600, bgColor: '#fff' },
+        blocks: []
+      }
+      const state = { 
+        before: JSON.parse(JSON.stringify(data.value)), 
+        after: defaultData 
+      }
+      return {
+        redo: () => { data.value = state.after },
+        undo: () => { data.value = state.before }
+      }
+    }
+  })
   // 监控键盘 -- 快捷键操作
   function keyboardEvent () {
     const keyCodes = {

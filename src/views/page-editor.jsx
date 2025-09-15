@@ -201,6 +201,7 @@ export default defineComponent({
               v-model:data={data.value}
               updateContainer={commandsMap.get('updateContainer')}
               updateBlock={commandsMap.get('updateBlock')}
+              reset={commandsMap.get('reset')}
             ></ActionAside>
           )}
         </ElContainer>
@@ -212,6 +213,7 @@ export default defineComponent({
             v-model:data={data.value}
             updateContainer={commandsMap.get('updateContainer')}
             updateBlock={commandsMap.get('updateBlock')}
+            reset={commandsMap.get('reset')}
           ></ActionAside>
         )}
       </div>
