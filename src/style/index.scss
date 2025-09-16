@@ -101,6 +101,8 @@
         &__item {
           height: 40px;
           position: absolute;
+          // 为所有组件预留边框空间，避免焦点切换时位置偏移
+          border: 1px solid transparent;
         }
       
         &__item--focus {

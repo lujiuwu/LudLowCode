@@ -10,11 +10,16 @@ export default defineComponent({
   },
   setup (props) {
     const style = {
-      preview: 'w-full h-30px bg-blueGray flex items-center justify-center text-white text-sm border border-gray-300',
-      render: `w-${data.container.width}px h-30px bg-blueGray flex items-center justify-center text-white text-sm border border-gray-300`
+      preview: 'w-full h-30px bg-blueGray',
+      render: 'h-30px bg-red'
     }
+    
+    const inlineStyle = props.type === 'render' ? {
+      width: `${data.container.width}px`
+    } : {}
+    
     return () => <>
-      <div class={style[props.type]}>
+      <div class={style[props.type]} style={inlineStyle}>
         默认文本
       </div>
     </>

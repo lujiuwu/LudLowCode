@@ -28,15 +28,16 @@ export default defineComponent({
       zIndex: currentBlock.value.zIndex
     }))
     const blockRef = ref(null)
-    // 渲染完毕后需要居中显示
+    // 渲染完毕后处理位置和尺寸
     onMounted(() => {
       const { offsetWidth, offsetHeight } = blockRef.value
       if (currentBlock.value.alignCenter) {
-        // 确保居中计算时使用正确的坐标
+        // 如果需要居中，将鼠标位置作为组件中心点，然后调整到左上角
         currentBlock.value.left = currentBlock.value.left - offsetWidth / 2
         currentBlock.value.top = currentBlock.value.top - offsetHeight / 2
         currentBlock.value.alignCenter = false
       }
+      // 如果不需要居中，直接使用鼠标位置作为组件的左上角位置
       // 在渲染完成之后，就需要给元素添加宽高属性
       currentBlock.value.width = offsetWidth
       currentBlock.value.height = offsetHeight

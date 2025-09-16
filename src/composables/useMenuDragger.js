@@ -14,15 +14,22 @@ export function useMenuDragger (containerRef, data) {
     e.dataTransfer.dropEffect = 'none'
   }
   function Drop (e) {
-    // 更新数据
+    // 获取容器的位置信息
+    const containerRect = containerRef.value.getBoundingClientRect()
+    
+    // 计算鼠标相对于容器的位置
+    const relativeX = e.clientX - containerRect.left
+    const relativeY = e.clientY - containerRect.top
+    
+    // 更新数据 - 直接使用鼠标位置作为组件的左上角位置
     data.value = {
       ...data.value,
       blocks: data.value.blocks.concat([{
-        top: e.offsetY,
-        left: e.offsetX,
+        top: relativeY,
+        left: relativeX,
         key: currentComponent.key,
         zIndex: 1,
-        alignCenter: true,
+        alignCenter: false, // 不需要居中，直接使用鼠标位置
         props: {
 
         },
