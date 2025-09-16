@@ -1,6 +1,7 @@
 // 导入渲染组件
-import { ElButton, ElInput, ElSelect, ElOption, ElSwitch } from 'element-plus'
-import { createInput, createColor, createSelector, createTable, createSlider } from './style'
+import { ElButton, ElInput, ElSelect, ElOption, ElSwitch, ElIcon, ElInputNumber } from 'element-plus'
+import { createInput, createColor, createSelector, createTable, createSlider, createRadioGroup } from './style'
+import { Search } from '@element-plus/icons-vue'
 // 基础组件配置
 export const basicComponents = [
   // 文本组件
@@ -8,13 +9,14 @@ export const basicComponents = [
     label: '文本',
     key: 'text',
     type: 'basic',
-    preview: () => <span class='preview'>默认文本</span>,
+    preview: () => <span style={{ textAlign: 'center' }}>默认文本</span>,
     render: (renderProps) => {
       if (renderProps && Object.keys(renderProps.props).length !== 0) {
         const text = renderProps.props.text || '默认文本'
-        const style = {}
+        const style = { textAlign: 'center' }
         if (renderProps.props.color) style.color = renderProps.props.color
         if (renderProps.props.size) style.fontSize = renderProps.props.size + 'px'
+        if (renderProps.props.weight) style.fontWeight = renderProps.props.weight
         return <span style={style}>{text}</span>
       }
       else return <span>默认文本</span>
@@ -29,6 +31,13 @@ export const basicComponents = [
         20: '20px',
         22: '22px',
       }, 14),
+      weight: createSelector('字体粗细', [
+        { label: '默认', value: 'normal' },
+        { label: '细体', value: 'lighter' },
+        { label: '更细体', value: '100' },
+        { label: '粗体', value: 'bold' },
+        { label: '更粗体', value: '900' }
+      ], 'normal')
     }
   },
   // 按钮组件
@@ -71,19 +80,41 @@ export const basicComponents = [
   },
   // 输入框组件
   {
-    label: '输入框',
-    text: '输入框',
+    label: '文本输入框',
+    text: '文本输入框',
     type: 'basic',
     preview: () => <ElInput class='preview' placeholder="默认文本"></ElInput>,
     render: (renderProps) => {
       if (renderProps) {
         return (
-      <ElInput
-        placeholder='默认文本'
-        size={renderProps.props?.size}
-        modelValue={renderProps.model?.default?.modelValue}
-        onUpdate:modelValue={renderProps.model?.default?.['onUpdate:modelValue']}
-      />
+          <ElInput
+          placeholder={renderProps.props?.placeholder || '默认文本'}
+          size={renderProps.props?.size}
+          modelValue={renderProps.model?.default?.modelValue}
+          onUpdate:modelValue={renderProps.model?.default?.['onUpdate:modelValue']}
+          v-slots={(() => {
+            const slots = {};
+            if (renderProps.props?.prefix && renderProps.props?.prefix !== 'default') {
+                slots.prepend = () => (
+                    renderProps.props?.prefix === 'https://'
+                        ? 'https://'
+                        : renderProps.props?.prefix === 'search'
+                            ? <ElIcon><Search /></ElIcon>
+                            : null
+                );
+            }
+            if (renderProps.props?.suffix && renderProps.props?.suffix !== 'default') {
+                slots.append = () => (
+                    renderProps.props?.suffix === '.com'
+                        ? '.com'
+                        : renderProps.props?.suffix === 'search'
+                            ? <ElIcon><Search /></ElIcon>
+                            : null
+                );
+            }
+            return slots;
+          })()}
+        />
         )
       } else {
         return <ElInput placeholder='默认文本' />
@@ -98,11 +129,90 @@ export const basicComponents = [
         { label: '默认', value: 'default' },
         { label: '大', value: 'large' },
         { label: '小', value: 'small' }
-      ], 'default')
+      ], 'default'),
+      placeholder: createInput('输入框提示', '默认文本'),
+      // 前缀
+      prefix: createRadioGroup('前缀',[
+        { label: '无', value: 'default' },
+        { label: '网址', value: 'https://' },
+        { label: '搜索', value: 'search' },
+      ], 'default'),
+      // 后缀
+      suffix: createRadioGroup('后缀', [
+        { label: '无', value: 'default' },
+        { label: '网址', value: '.com' },
+        { label: '搜索', value: 'search' },
+      ], 'default'),
     },
     // 伸缩选项
     resize: {
       width: true
+    },
+
+  },
+  // 文本域组件
+  {
+    label: '文本域',
+    text: '文本域',
+    type: 'basic',
+    preview: () => <ElInput type="textarea" class='preview' placeholder="默认文本"></ElInput>,
+    render: (renderProps) => {
+      if (renderProps) {
+        return <ElInput type="textarea" placeholder={renderProps.props?.placeholder || '默认文本'} size={renderProps.props?.size} />
+      } else {
+        return <ElInput type="textarea" placeholder='默认文本' />
+      }
+    },
+    key: 'textarea',
+    props: {
+      size: createSelector('文本域尺寸', [
+        { label: '默认', value: 'default' },
+        { label: '大', value: 'large' },
+        { label: '小', value: 'small' }
+      ], 'default'),
+    }
+  },
+  // 步进器
+  {
+    label: '步进器',
+    text: '步进器',
+    type: 'basic',
+    preview: () => <ElInputNumber class='preview' placeholder="默认文本"></ElInputNumber>,
+    render: (renderProps) => {
+      if (renderProps) {
+        return <ElInputNumber placeholder={renderProps.props?.placeholder || '默认文本'} size={renderProps.props?.size} />
+      } else {
+        return <ElInputNumber placeholder='默认文本' />
+      }
+    },
+    key: 'inputNumber',
+    props: {
+      size: createSelector('步进器尺寸', [
+        { label: '默认', value: 'default' },
+        { label: '大', value: 'large' },
+        { label: '小', value: 'small' }
+      ], 'default'),
+      step: createSlider('步长', 1, 5, 1, {
+        '1': '1',
+        '2': '2',
+        '3': '3',
+        '4': '4',
+        '5': '5',
+      }, 1),
+      min: createSlider('最小值', 1, 5, 1, {
+        '1': '1',
+        '2': '2',
+        '3': '3',
+        '4': '4',
+        '5': '5',
+      }, 1),
+      max: createSlider('最大值', 10, 50, 10, {
+        '10': '10',
+        '20': '20',
+        '30': '30',
+        '40': '40',
+        '50': '50',
+      }, 10)
     }
   },
   // 下拉框组件
@@ -119,7 +229,7 @@ export const basicComponents = [
           <ElSelect
             {...modelProps}
             style="width: 172px"
-            placeholder='默认文本'
+            placeholder={renderProps.props?.placeholder || '默认文本'}
             size={selectSize}
           >
             {(renderProps.props.options || []).map((option, index) => {
@@ -136,7 +246,7 @@ export const basicComponents = [
         )
       } else {
         return (
-          <ElSelect style="width: 172px" placeholder='默认文本'></ElSelect>
+          <ElSelect style="width: 172px" placeholder={renderProps.props?.placeholder || '默认文本'}></ElSelect>
         )
       }
     },
@@ -153,11 +263,12 @@ export const basicComponents = [
         { label: '默认', value: 'default' },
         { label: '大', value: 'large' },
         { label: '小', value: 'small' }
-      ], 'default')
+      ], 'default'),
+      placeholder: createInput('下拉框提示', '默认文本')
     },
     model: {
       default: '绑定数据' // 默认值设为空字符串
-    }
+    },
   },
   // 开关组件
   {

@@ -8,3 +8,7 @@ export const createSelector = (label, options, defaultValue) => ({ type: 'select
 export const createTable = (label, table, defaultValue) => ({ type: 'table', label, table, defaultValue })
 // 滑块
 export const createSlider = (label, min, max, step, marks, defaultValue) => ({ type: 'slider', label, min, max, step, marks, defaultValue })
+// 多选框组
+export const createCheckboxGroup = (label, checkList,defaultValue) => ({ type: 'checkboxGroup', label, checkList, defaultValue })
+// 单选框组
+export const createRadioGroup = (label, radioList,defaultValue) => ({ type: 'radioGroup', label, radioList, defaultValue })

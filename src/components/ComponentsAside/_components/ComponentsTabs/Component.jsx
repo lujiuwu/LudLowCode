@@ -34,7 +34,7 @@ export default defineComponent({
     }
     return () => (
       <>
-      <div class='pt-10px pl-15px h-auto! flex flex-col font-size-16px'>
+      <div class='pt-10p pl-5px h-auto! flex flex-col font-size-16px'>
           <ElTabs tab-position="left" modelValue={currentTab.value} onTabChange={handleClick}>
           {blockTypes.map(block => (
             <ElTabPane
@@ -56,7 +56,7 @@ export default defineComponent({
           <Expand v-show={!isOpenAside.value}></Expand>
         </ElIcon>
         </div>
-        </div>
+      </div>
       </>
     )
   }

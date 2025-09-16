@@ -1,5 +1,5 @@
 import { computed, defineComponent, inject, ref, onMounted, onUnmounted } from 'vue'
-import { ElContainer } from 'element-plus'
+import { ElContainer, ElMessage } from 'element-plus'
 import { Header, Main, ComponentsAside, ActionAside } from '@/components'
 import { useMenuDragger, useFocus, useBlockDrag, useCommand } from '@/composables'
 import { Dialog as $dialog } from '@/components/Dialog'
@@ -45,6 +45,9 @@ export default defineComponent({
                   commandsMap.get('updateBlock')(JSON.parse(text), block)
                 }
               })
+            }}></DropDownItem>
+            <DropDownItem label='导出为组件' onClick={() => {
+              ElMessage.success('导出成功！前往”我的组件“查看')
             }}></DropDownItem>
           </>
         }

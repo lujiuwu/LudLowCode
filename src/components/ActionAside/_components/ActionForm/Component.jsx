@@ -1,5 +1,5 @@
 import { defineComponent, inject, watch, reactive } from 'vue'
-import { ElForm, ElFormItem, ElInputNumber, ElButton, ElInput, ElSelect, ElOption, ElColorPicker, ElSlider } from 'element-plus'
+import { ElForm, ElFormItem, ElInputNumber, ElButton, ElInput, ElSelect, ElOption, ElColorPicker, ElSlider, ElRadioGroup, ElRadio, ElCheckboxGroup, ElCheckbox } from 'element-plus'
 import TableEditor from '@/components/ActionAside/_components/TableEditor/Component.jsx'
 
 export default defineComponent({
@@ -31,9 +31,11 @@ export default defineComponent({
         }
       }
     }
+    // 预设颜色
+    const predefineColor = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399', '#FFFFFF', '#000000', '#A3A6AD']
     const rules = {
       input: (propName, propConfig) => <ElInput v-model={state.editData.props[propName]}></ElInput>,
-      color: (propName, propConfig) => <ElColorPicker v-model={state.editData.props[propName]}></ElColorPicker>,
+      color: (propName, propConfig) => <ElColorPicker v-model={state.editData.props[propName]} show-alpha predefine={predefineColor}></ElColorPicker>,
       selector: (propName, propConfig) => {
         return <ElSelect 
           v-model={state.editData.props[propName]}
@@ -55,10 +57,23 @@ export default defineComponent({
       },
       table: (propName, propConfig) => <TableEditor propConfig={propConfig} v-model={state.editData.props[propName]}>
       </TableEditor>,
+      checkboxGroup: (propName, propConfig) => {
+        return <ElCheckboxGroup v-model={state.editData.props[propName]}>
+          {propConfig.checkList.map(item => {
+            return <ElCheckbox label={item}></ElCheckbox>
+          })}
+        </ElCheckboxGroup>
+      },
+      radioGroup: (propName, propConfig) => {
+        return <ElRadioGroup v-model={state.editData.props[propName]}>
+          {propConfig.radioList.map(item => {
+            return <ElRadio label={item.value}>{item.label}</ElRadio>
+          })}
+        </ElRadioGroup>
+      }
     }
     // 应用方法
     function onApply () {
-      console.log(state)
       if (!props.block) props.updateContainer({ ...props.data, container: state.editData })
       else props.updateBlock(state.editData, props.block)
     }
@@ -93,7 +108,7 @@ export default defineComponent({
         if (component && component.props) {
           container.push(
             Object.entries(component.props).map(([propName, propConfig]) => {
-              return <ElFormItem label={propConfig.label}>
+              return <ElFormItem label={propConfig.label} style={{ marginBottom: '30px' }}>
                 {rules[propConfig.type](propName, propConfig)}
               </ElFormItem>
             })
