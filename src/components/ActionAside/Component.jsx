@@ -13,7 +13,9 @@ export default defineComponent({
   setup (props, { attrs }) {
     return () => (
       <ElAside
+        width='20vw'
         class={['outer-content__operator-aside', 'aside-color', attrs.class]}>
+          
         <ActionForm
           block={props.LastSelectedBlock}
           v-model:data={props.data}

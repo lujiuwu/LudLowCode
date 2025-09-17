@@ -40,6 +40,19 @@ export const basicComponents = [
       ], 'normal')
     }
   },
+  // 图片
+  {
+    label: '图片',
+    key: 'image',
+    type: 'basic',
+    preview: () => <ElImage class='preview' src='https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg' />,
+    render: (renderProps) => {
+      return <ElImage src={renderProps.props.src || 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'} />
+    },
+    props: {
+      src: createInput('图片地址', 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg')
+    }
+  },
   // 按钮组件
   {
     label: '按钮',
