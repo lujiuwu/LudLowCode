@@ -72,7 +72,7 @@ export function useBlockDrag (
       block.left = dragState.startPos[index].left + duX
     })
   }
-  function KeyMouseUp (e: TouchEvent | MouseEvent) {
+  function KeyMouseUp () {
     // 移除鼠标和触摸事件监听器
     document.removeEventListener('mousemove', KeyMouseMove)
     document.removeEventListener('mouseup', KeyMouseUp)
