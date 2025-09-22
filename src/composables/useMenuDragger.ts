@@ -1,19 +1,24 @@
 import { events } from '@/packages/events'
-import { render } from 'vue'
-export function useMenuDragger (containerRef, data) {
+import { render, type Ref } from 'vue'
+import type { Data } from '@/types/Data'
+import type { PreviewComponent } from '@/types/PreviewComponent'
+
+export function useMenuDragger (containerRef:Ref<HTMLElement|null>, data:Ref<Data>) {
   // 当前拖拽的元素
-  let currentComponent = null
+  let currentComponent = null as PreviewComponent | null
   // 拖拽方法
-  function DragEnter (e) {
-    e.dataTransfer.dropEffect = 'move'
+  function DragEnter (e:DragEvent) {
+    e.dataTransfer && (e.dataTransfer.dropEffect = 'move')
   }
-  function DragOver (e) {
+  function DragOver (e:DragEvent) {
     e.preventDefault()
   }
-  function DragLeave (e) {
-    e.dataTransfer.dropEffect = 'none'
+  function DragLeave (e:DragEvent) {
+    e.dataTransfer && (e.dataTransfer.dropEffect = 'none')
   }
-  function Drop (e) {
+  function Drop (e:DragEvent) {
+    if (!containerRef.value) return
+    
     // 获取容器的位置信息
     const containerRect = containerRef.value.getBoundingClientRect()
     
@@ -22,6 +27,8 @@ export function useMenuDragger (containerRef, data) {
     const relativeY = e.clientY - containerRect.top
     
     // 更新数据 - 直接使用鼠标位置作为组件的左上角位置
+    if (!currentComponent) return
+    
     data.value = {
       ...data.value,
       blocks: data.value.blocks.concat([{
@@ -30,17 +37,16 @@ export function useMenuDragger (containerRef, data) {
         key: currentComponent.key,
         zIndex: 1,
         alignCenter: false, // 不需要居中，直接使用鼠标位置
-        props: {
-
-        },
-        model: {
-
-        }
+        width: 0, // 初始宽度，会在渲染后更新
+        height: 0, // 初始高度，会在渲染后更新
+        focus: false, // 初始焦点状态
+        props: {},
+        model: {}
       }])
     }
     currentComponent = null
   }
-  function DragFunction (e, component) {
+  function DragFunction (e:DragEvent, component:PreviewComponent) {
   // 1. 获取 VNode
     const vnode = component.preview()
 
@@ -51,20 +57,21 @@ export function useMenuDragger (containerRef, data) {
     document.body.appendChild(container)
 
     // 3. 渲染 VNode 到真实 DOM
-    render(vnode, container)
+    render(vnode as any, container)
 
     // 4. 获取渲染后的 DOM 元素
     const dragPreview = container.firstElementChild
 
     // 5. 设置拖拽预览
-    if (dragPreview) {
-      dragPreview.style.opacity = '0.7'
-      dragPreview.style.pointerEvents = 'none'
-      e.dataTransfer.setDragImage(dragPreview, 0, 0)
+    if (dragPreview && e.dataTransfer) {
+      const htmlElement = dragPreview as HTMLElement
+      htmlElement.style.opacity = '0.7'
+      htmlElement.style.pointerEvents = 'none'
+      e.dataTransfer.setDragImage(htmlElement, 0, 0)
     }
 
     // 6. 设置拖拽数据
-    e.dataTransfer.setData('component', JSON.stringify(component))
+    e.dataTransfer?.setData('component', JSON.stringify(component))
 
     // 7. 绑定事件
     containerRef.value?.addEventListener('dragenter', DragEnter)
@@ -83,7 +90,9 @@ export function useMenuDragger (containerRef, data) {
 
     setTimeout(cleanup, 0)
   }
-  function DragEndFunction (e, component) {
+  function DragEndFunction () {
+    if (!containerRef.value) return
+    
     containerRef.value.removeEventListener('dragenter', DragEnter)
     containerRef.value.removeEventListener('dragover', DragOver)
     containerRef.value.removeEventListener('dragleave', DragLeave)

@@ -1,21 +1,24 @@
-import { onUnmounted } from 'vue'
+import { onUnmounted, type Ref } from 'vue'
 import { events } from '@/packages/events'
+import type { Command } from '@/types/Command'
+import type { Data } from '@/types/Data'
+import type { RenderComponent } from '@/types/RenderComponent'
 
-export function useCommand (data) {
+export function useCommand (data: Ref<Data>) {
   // 命令函数
   const state = {
     current: -1, // 前进后退的索引值
-    commandQueue: [], // 操作命令队列
+    commandQueue: [] as { redo: () => void, undo: () => void }[], // 操作命令队列
     commandsMap: new Map(), // 操作命令映射表
-    commandsArray: [], // 获取所有命令
-    destroyList: [] // 销毁方法数组
+    commandsArray: [] as Command[], // 获取所有命令
+    destroyList: [] as (() => void)[] // 销毁方法数组
   }
   // 注册函数
-  const register = (command) => {
+  const register = (command: Command) => {
     state.commandsArray.push(command)
-    state.commandsMap.set(command.name, (...args) => {
+    state.commandsMap.set(command.name, (...args: any[]) => {
       const { redo, undo } = command.execute(...args)
-      redo()
+      redo?.()
       // 把需要的操作放入队列
       if (!command.isPushQueue) return
       let { commandQueue: queue, current } = state
@@ -23,7 +26,7 @@ export function useCommand (data) {
         queue = queue.slice(0, current + 1)
         state.commandQueue = queue
       }
-      queue.push({ redo, undo })
+      queue.push({ redo: redo!, undo: undo! })
       state.current = current + 1
     })
   }
@@ -109,7 +112,7 @@ export function useCommand (data) {
     name: 'drag',
     isPushQueue: true,
     init () {
-      this.before = null
+      this.before = []
       const start = () => {
         this.before = JSON.parse(JSON.stringify(data.value.blocks))
       }
@@ -129,7 +132,7 @@ export function useCommand (data) {
           data.value.blocks = after // 只修改blocks部分
         },
         undo () {
-          data.value.blocks = before // 只修改blocks部分
+          data.value.blocks = before || [] // 只修改blocks部分
         }
       }
     }
@@ -138,7 +141,7 @@ export function useCommand (data) {
   register({
     name: 'toTop',
     isPushQueue: true,
-    execute (BlocksObj) {
+    execute (BlocksObj: Ref<{ focusBlocks: RenderComponent[], unfocusBlocks: RenderComponent[] }>) {
       // 获取当前选中的元素
       const { focusBlocks, unfocusBlocks } = BlocksObj.value
       const topIndex = unfocusBlocks.reduce((prev, block) => { return Math.max(prev, block.zIndex) }, -Infinity)
@@ -163,7 +166,7 @@ export function useCommand (data) {
   register({
     name: 'toBottom',
     isPushQueue: true,
-    execute (BlocksObj) {
+    execute (BlocksObj: Ref<{ focusBlocks: RenderComponent[], unfocusBlocks: RenderComponent[] }>) {
       // 获取当前选中的元素
       const { focusBlocks, unfocusBlocks } = BlocksObj.value
       const bottomIndex = unfocusBlocks.reduce((prev, block) => { return Math.min(prev, block.zIndex) }, Infinity)
@@ -188,7 +191,7 @@ export function useCommand (data) {
   register({
     name: 'delete',
     isPushQueue: true,
-    execute (BlocksObj) {
+    execute (BlocksObj: Ref<{ unfocusBlocks: RenderComponent[] }>) {
       const { unfocusBlocks } = BlocksObj.value
       const state = {
         before: JSON.parse(JSON.stringify(data.value.blocks)),
@@ -219,39 +222,10 @@ export function useCommand (data) {
       }
     }
   })
-  // 监控键盘 -- 快捷键操作
-  function keyboardEvent () {
-    const keyCodes = {
-      90: 'z',
-      89: 'y'
-    }
-    const onKeyDown = (e) => {
-      const { ctrlKey, keyCode } = e
-      let keyString = []
-      if (ctrlKey) keyString.push('ctrl')
-      keyString.push(keyCodes[keyCode])
-      keyString = keyString.join('+')
-      state.commandsArray.forEach(({ keyboard, name }) => {
-        if (!keyboard) return
-        if (keyboard === keyString) {
-          state.commandsMap.get(name)()
-          e.preventDefault()
-        }
-      })
-    }
-    const init = () => {
-      window.addEventListener('keydown', onKeyDown)
-      return () => {
-        window.removeEventListener('keydown', onKeyDown)
-      }
-    }
-    return init
-  }
   // 统一初始化
   ; (() => {
     // 监听键盘事件
-    state.destroyList.push(keyboardEvent())
-    state.commandsArray.forEach(command => command.init && state.destroyList.push(command.init()))
+      state.commandsArray.forEach(command => command.init && state.destroyList.push(command.init() as () => void))
   })()
   // 统一销毁
   onUnmounted(() => {

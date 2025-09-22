@@ -1,16 +1,18 @@
-import { computed, ref } from 'vue'
-
-export function useFocus (data, isPreview, menuShow, callback) {
+import { computed, ref, type Ref } from 'vue'
+import type { Data } from '@/types/Data'
+import type { RenderComponent } from '@/types/RenderComponent'
+export function useFocus (data: Ref<Data>, isPreview: Ref<boolean>, menuShow: Ref<boolean>, callback: (e: Event) => void) {
   // 当前点击的元素
-  const currentSelectedBlock = ref(-1)
   // 初始值为-1 表示没有任何元素被选中
+  const currentSelectedBlock = ref(-1)
+  
   const LastSelectedBlock = computed(() => data.value.blocks[currentSelectedBlock.value])
   // 清空函数
   function ClearBlockFocus () {
     data.value.blocks.forEach(block => { block.focus = false })
   }
   // 内部拖拽
-  function BlockMouseDown (e, block, index) {
+  function BlockMouseDown (e: TouchEvent | MouseEvent, block: RenderComponent, index: number) {
     if (isPreview.value) return
 
     // 支持触摸事件和鼠标事件
@@ -21,7 +23,7 @@ export function useFocus (data, isPreview, menuShow, callback) {
     e.stopPropagation()
 
     // 对于触摸事件，检查是否是多点触控（忽略多点触控）
-    if (isTouch && e.touches.length > 1) {
+    if (isTouch && (e as TouchEvent).touches.length > 1) {
       return
     }
     // 1. 不按shift 每次点击前要清空之前的效果
@@ -41,8 +43,8 @@ export function useFocus (data, isPreview, menuShow, callback) {
   }
   // 计算哪些属性被选中
   const BlocksObj = computed(() => {
-    const focusBlocks = []
-    const unfocusBlocks = []
+    const focusBlocks = [] as RenderComponent[]
+    const unfocusBlocks = [] as RenderComponent[]
     data.value.blocks.forEach(block => { block.focus ? focusBlocks.push(block) : unfocusBlocks.push(block) })
     return { focusBlocks, unfocusBlocks }
   })

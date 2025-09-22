@@ -1,29 +1,42 @@
-import { reactive } from 'vue'
+import { reactive, type Ref } from 'vue'
 import { events } from '@/packages/events'
+import type {RenderComponent} from '@/types/RenderComponent'
+import type {Container} from '@/types/Container'
 
-export function useBlockDrag (BlocksObj, LastSelectedBlock, containerRef) {
-  const dragState = {
+export function useBlockDrag (
+  BlocksObj: Ref<{ focusBlocks: RenderComponent[], unfocusBlocks: RenderComponent[] }>, 
+  LastSelectedBlock: Ref<RenderComponent>, 
+  containerRef: Ref<Container|null>
+) {
+  const dragState = reactive({
     startX: 0,
     startY: 0,
-    dragging: false // 是否正在拖拽
-  }
+    dragging: false, // 是否正在拖拽
+    startLeft: 0,
+    startTop: 0,
+    startPos: [] as Array<{top: number, left: number}>,
+    lines: { 
+      x: [] as { showLeft: number, left: number }[], 
+      y: [] as { showTop: number, top: number }[] 
+    }
+  })
   const markLine = reactive({
-    x: null,
-    y: null
+    x: null as number | null,
+    y: null as number | null
   })
   // 内部拖拽组件
-  function KeyMouseMove (e) {
+  function KeyMouseMove (e: TouchEvent | MouseEvent) {
     // 支持触摸事件和鼠标事件
     const isTouch = e.type === 'touchmove'
     let moveX, moveY
 
     if (isTouch) {
       e.preventDefault() // 阻止默认的滚动行为
-      moveX = e.touches[0].clientX
-      moveY = e.touches[0].clientY
+      moveX = (e as TouchEvent).touches[0].clientX
+      moveY = (e as TouchEvent).touches[0].clientY
     } else {
-      moveX = e.clientX
-      moveY = e.clientY
+      moveX = (e as MouseEvent).clientX
+      moveY = (e as MouseEvent).clientY
     }
     if (!dragState.dragging) {
       dragState.dragging = true
@@ -32,8 +45,8 @@ export function useBlockDrag (BlocksObj, LastSelectedBlock, containerRef) {
     // 计算当前元素最新的left和top
     const left = moveX - dragState.startX + dragState.startLeft
     const top = moveY - dragState.startY + dragState.startTop
-    let y = top + e.target.offsetHeight / 2
-    let x = left + e.target.offsetWidth / 2
+    let y = top + (e.target as HTMLElement).offsetHeight / 2
+    let x = left + (e.target as HTMLElement).offsetWidth / 2
     for (let i = 0; i < dragState.lines.y.length; i++) {
       const { top: t, showTop: s } = dragState.lines.y[i]
       if (Math.abs(t - top) < 5) {
@@ -59,7 +72,7 @@ export function useBlockDrag (BlocksObj, LastSelectedBlock, containerRef) {
       block.left = dragState.startPos[index].left + duX
     })
   }
-  function KeyMouseUp (e) {
+  function KeyMouseUp (e: TouchEvent | MouseEvent) {
     // 移除鼠标和触摸事件监听器
     document.removeEventListener('mousemove', KeyMouseMove)
     document.removeEventListener('mouseup', KeyMouseUp)
@@ -72,18 +85,18 @@ export function useBlockDrag (BlocksObj, LastSelectedBlock, containerRef) {
     markLine.x = null
     markLine.y = null
   }
-  function InnerMouseDown (e) {
+  function InnerMouseDown (e: TouchEvent | MouseEvent) {
     // 支持触摸事件和鼠标事件
     const isTouch = e.type === 'touchstart'
     let startX, startY
 
     if (isTouch) {
       e.preventDefault() // 阻止默认的滚动行为
-      startX = e.touches[0].clientX
-      startY = e.touches[0].clientY
+      startX = (e as TouchEvent).touches[0].clientX
+      startY = (e as TouchEvent).touches[0].clientY
     } else {
-      startX = e.clientX
-      startY = e.clientY
+      startX = (e as MouseEvent).clientX
+      startY = (e as MouseEvent).clientY
     }
     const { width: currentBlockWidth, height: currentBlockHeight } = LastSelectedBlock.value
     dragState.dragging = false
@@ -95,12 +108,12 @@ export function useBlockDrag (BlocksObj, LastSelectedBlock, containerRef) {
     dragState.lines = (() => {
       // 我们要计算是相对没选中元素的信息
       const { unfocusBlocks } = BlocksObj.value
-      const lines = { x: [], y: [] }
+      const lines = { x: [] as { showLeft: number, left: number }[], y: [] as { showTop: number, top: number }[] }
       const blocks = [...unfocusBlocks, {
         top: 0,
         left: 0,
-        width: containerRef.value.width,
-        hight: containerRef.value.height
+        width: containerRef?.value?.width || 0,
+        height: containerRef?.value?.height || 0
       }]
       blocks.forEach(block => {
         const { top: otherTop, left: otherLeft, width: otherWidth, height: otherHeight } = block
@@ -116,7 +129,7 @@ export function useBlockDrag (BlocksObj, LastSelectedBlock, containerRef) {
         lines.y.push({ showTop: otherTop + otherHeight, top: otherTop + otherHeight - currentBlockHeight })
 
         lines.x.push({ showLeft: otherLeft, left: otherLeft })
-        lines.x.push({ showTop: otherLeft + otherWidth / 2, top: otherLeft + otherWidth / 2 - currentBlockWidth / 2 })
+        lines.x.push({ showLeft: otherLeft + otherWidth / 2, left: otherLeft + otherWidth / 2 - currentBlockWidth / 2 })
         lines.x.push({ showLeft: otherLeft + otherWidth, left: otherLeft + otherWidth })
         lines.x.push({ showLeft: otherLeft + otherWidth, left: otherLeft + otherWidth - currentBlockWidth })
         lines.x.push({ showLeft: otherLeft, left: otherLeft - currentBlockWidth })

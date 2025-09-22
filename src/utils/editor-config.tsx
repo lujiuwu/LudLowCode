@@ -1,17 +1,18 @@
-import { basicComponents, layoutComponents, feedbackComponents, myComponents } from '@/types'
+import { basicComponents, layoutComponents, feedbackComponents, myComponents } from '@/utils/_types'
+import type { PreviewComponent } from '@/types/PreviewComponent'
 
 function createEditionConfig () {
   const componentList = {
-    basic: [],
-    layout: [],
-    feedBack: [],
-    my: []
+    basic: [] as PreviewComponent[],
+    layout: [] as PreviewComponent[],
+    feedBack: [] as PreviewComponent[],
+    my: [] as PreviewComponent[]
   }
-  const componentMap = new Map()
+  const componentMap = new Map<string, PreviewComponent>()
   return {
     componentList,
     componentMap,
-    register: (component) => {
+    register: (component:PreviewComponent) => {
       if (component.type === 'basic') {
         componentList.basic.push(component)
       } else if (component.type === 'layout') {
